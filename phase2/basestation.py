@@ -1,4 +1,4 @@
-# 2=> Basestation
+
 
 from pathlib import Path
 
@@ -120,7 +120,7 @@ screen_width = window.winfo_screenwidth()
 
 screen_height = window.winfo_screenheight() - window.winfo_toplevel().winfo_height()
 
-screen_height = window.winfo_screenheight()-80
+screen_height = window.winfo_screenheight()-70
 
 
 
@@ -446,27 +446,29 @@ def sendmessages():
 
                 if objectdata["devices"][device_idx]["previousheartbeat"] == objectdata["devices"][device_idx]["timestamp"]:
 
-                    # connectioncheck[device_idx] += 1
 
 
+                    if connectioncheck[device_idx] >= 50:
 
-                    # if connectioncheck[device_idx] >= 20:
+                        print(f"{device_idx} disconnected")
 
-                    #     print(f"{device_idx} disconnected")
+                        # Remove the device from objectdata
 
-                    #     # Remove the device from objectdata
+                        if(map_widget!=None and device_idx in markershandle):
 
-                    #     if(map_widget!=None and device_idx in markershandle):
+                            markershandle[device_idx].delete()
 
-                    #         markershandle[device_idx].delete()
+                            markershandle.pop(device_idx)
 
-                    #         markershandle.pop(device_idx)
+                        del objectdata["devices"][device_idx]
 
-                    #     del objectdata["devices"][device_idx]
-
-                    #     del connectioncheck[device_idx]
+                        del connectioncheck[device_idx]
 
                     print("")
+
+                    connectioncheck[device_idx] += 1
+
+
 
                 else:
 
@@ -480,7 +482,7 @@ def sendmessages():
 
                 
 
-        time.sleep(0.3)
+        time.sleep(0.5)
 
 
 
@@ -760,11 +762,11 @@ def login():
 
             0.0,
 
-            52.0,
+            35.0,
 
             225.0,
 
-            256.0,
+            200.0,
 
             fill="#6BE8E1",
 
@@ -852,7 +854,7 @@ def login():
 
             1536.0,
 
-            51.0,
+            35.0,
 
             fill="#2E56E6",
 
@@ -866,7 +868,7 @@ def login():
 
             17.9532470703125,
 
-            0.0,
+            5.0,
 
             anchor="nw",
 
@@ -886,11 +888,11 @@ def login():
 
             0.0,
 
-            256.0,
+            200.0,
 
             225.0,
 
-            650.0,
+            500.0,
 
             fill="#D9D6D6",
 
@@ -908,7 +910,7 @@ def login():
 
             0.0,
 
-            650.0,
+            500.0,
 
             225.0,    
 
@@ -924,7 +926,7 @@ def login():
 
             30.0,
 
-            700.0,
+            530.0,
 
             anchor="nw",
 
@@ -942,7 +944,7 @@ def login():
 
             30.0,
 
-            730.0,
+            550.0,
 
             anchor="nw",
 
@@ -1044,7 +1046,7 @@ def login():
 
             relief="flat",
 
-            text="Arm",
+            text="Takeoff",
 
             background="green"
 
@@ -1054,9 +1056,9 @@ def login():
 
             x=30.0,
 
-            y=750.0,
+            y=570.0,
 
-            width=50.6624984741211,
+            width=52.6624984741211,
 
             height=37.38615036010742
 
@@ -1076,7 +1078,7 @@ def login():
 
             relief="flat",
 
-            text="Disarm",
+            text="Land",
 
             background="green"
 
@@ -1086,9 +1088,9 @@ def login():
 
             x=130.0,
 
-            y=750.0,
+            y=570.0,
 
-            width=50.6624984741211,
+            width=52.6624984741211,
 
             height=37.38615036010742
 
@@ -1100,7 +1102,7 @@ def login():
 
             70.0,
 
-            670.0,
+            510.0,
 
             anchor="nw",
 
@@ -1138,7 +1140,7 @@ def login():
 
             x=150.0,
 
-            y=270.0,
+            y=210.0,
 
             width=70.0,
 
@@ -1168,7 +1170,7 @@ def login():
 
             x=75,
 
-            y=269.9405822753906,
+            y=210,
 
             width=70.0,
 
@@ -1198,7 +1200,7 @@ def login():
 
             x=0.0,
 
-            y=269.9405822753906,
+            y=210,
 
             width=70.0,
 
@@ -1226,7 +1228,7 @@ def login():
 
             x=175.0,
 
-            y=35.0,
+            y=20.0,
 
             )
 
@@ -1234,13 +1236,21 @@ def login():
 
         map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)  # google satellitemap_widget.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
-        map_widget.set_address("Hyderabad",marker=False)
+        
+
+        # map_widget.set_address("Cherlapalli,Secunderabad,Telangana", marker=False, image_zoom_visibility=(14, float("inf")))
+
+        map_widget.set_position(17.464435, 78.594023)
+
+        map_widget.set_zoom(21)
+
+
 
         textarea = maincanvas.create_text(
 
             0,
 
-            320.0,
+            250.0,
 
             anchor="nw",
 
@@ -1484,7 +1494,7 @@ button_1.place(
 
     x=782.0,
 
-    y=593.0,
+    y=523.0,
 
     width=404.0,
 
