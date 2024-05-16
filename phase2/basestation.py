@@ -6,6 +6,10 @@ from PIL import Image, ImageTk
 
 
 
+
+
+
+
 # from tkinter import *
 
 # Explicit imports to satisfy Flake8
@@ -274,11 +278,13 @@ def send_mavlink_message(deviceid):
 
 
 
+checkisarmed = 0
+
 # Function to receive and decode custom messages
 
 def receive_custom_messages():
 
-    global deviceid
+    global deviceid,targetid,armingstate,checkisarmed
 
     while True:
 
@@ -312,13 +318,37 @@ def receive_custom_messages():
 
                             objectdata["devices"][deviceid]["heartbeat"] = decoded_msg["param1"]
 
-                            objectdata["devices"][deviceid]["battery"] = int(decoded_msg["param2"])
+                            # objectdata["devices"][deviceid]["battery"] = int(decoded_msg["param2"])
 
                             objectdata["devices"][deviceid]["mode"] = int(decoded_msg["param3"])
 
+                            objectdata["devices"][deviceid]["timestamp"] = float(decoded_msg["param5"])
+
                             objectdata["devices"][deviceid]["armstatus"] = int(decoded_msg["param4"])
 
-                            objectdata["devices"][deviceid]["timestamp"] = float(decoded_msg["param5"])
+                            print("arming status",int(decoded_msg["param4"]))
+
+                            if(int(decoded_msg["param4"]) ==1):
+
+                                checkisarmed = 1
+
+                            if(int(decoded_msg["param4"] == 0)):
+
+                                if(checkisarmed == 1):
+
+                                    print(F"{deviceid} mission completed disarming")
+
+                                    targetid = deviceid
+
+                                    armingstate = 0
+
+                                    objectdata["devices"][deviceid]["setarmstate"] = 0
+
+                                    relayingtargetid == 0
+
+                                    checkisarmed = 0
+
+                                
 
 
 
@@ -344,6 +374,28 @@ def receive_custom_messages():
 
                             objectdata["devices"][deviceid]["satellites"] = int(decoded_msg["param5"])
 
+                            objectdata["devices"][deviceid]["armstatus"] = int(decoded_msg["param6"])
+
+                            print("arming status",int(decoded_msg["param6"]))
+
+                            if(int(decoded_msg["param6"]) ==1):
+
+                                checkisarmed = 1
+
+                            if(int(decoded_msg["param6"] == 0)):
+
+                                if(checkisarmed == 1):
+
+                                    print(F"{deviceid} mission completed disarming")
+
+                                    targetid = deviceid
+
+                                    armingstate = 0
+
+                                    objectdata["devices"][deviceid]["setarmstate"] = 0
+
+                                    relayingtargetid == 0
+
                        
 
                            
@@ -362,11 +414,11 @@ def receive_custom_messages():
 
                                     "heartbeatcount":0,
 
-                                    "battery":-1,
+                                    # "battery":-1,
 
                                     "gps":[0,0],
 
-                                    "attitude":-1,
+                                    # "attitude":-1,
 
                                     "altitude":-1,
 
@@ -448,21 +500,19 @@ def sendmessages():
 
 
 
-                    if connectioncheck[device_idx] >= 50:
+                    # if connectioncheck[device_idx] >= 20:
 
-                        print(f"{device_idx} disconnected")
+                    #     print(f"{device_idx} disconnected")
 
-                        # Remove the device from objectdata
+                    #     # Remove the device from objectdata
 
-                        if(map_widget!=None and device_idx in markershandle):
+                    #     if(map_widget!=None and device_idx in markershandle):
 
-                            markershandle[device_idx].delete()
+                    #         markershandle[device_idx].delete()
 
-                            markershandle.pop(device_idx)
+                    #         markershandle.pop(device_idx)
 
-                        del objectdata["devices"][device_idx]
-
-                        del connectioncheck[device_idx]
+                    #     del objectdata["devices"][devices_idx]
 
                     print("")
 
@@ -704,11 +754,11 @@ def login():
 
                                 context_menu.add_separator()
 
-                                context_menu.add_command(label="Arm Drone", command=lambda attr=marker.data:setdronerelaying(2,attr))
+                                context_menu.add_command(label="Takeoff", command=lambda attr=marker.data:setdronerelaying(2,attr))
 
                                 context_menu.add_separator()
 
-                                context_menu.add_command(label="DisArm Drone", command=lambda attr=marker.data:setdronerelaying(3,attr))
+                                context_menu.add_command(label="Land", command=lambda attr=marker.data:setdronerelaying(3,attr))
 
                                 context_menu.add_separator()
 
