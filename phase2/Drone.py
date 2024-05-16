@@ -1,6 +1,4 @@
-# 2=> Drone code
-
-#7/5/24 D1 drone relaying
+#D1 drone relaying
 from pymavlink import mavutil
 import time
 
@@ -31,7 +29,7 @@ def log_example(type,msg):
         logcount = logcount+1
 
 log_example("D","Initializing...")
-connection_string = "/dev/serial/by-id/usb-CubePilot_CubeOrange+_1F0047000B51323031393637-if00"#args.connect
+connection_string = "/dev/serial/by-id/usb-CubePilot_CubeOrange+_290027000851323031393637-if00"#args.connect
 # Connect to the Vehicle
 print('Connecting to vehicle on: %s' % connection_string)
 vehicle = connect(connection_string, wait_ready=True, baud=921600)
@@ -46,6 +44,11 @@ log_example("D","Connecting to device")
 
 vehicle.mode = VehicleMode("STABILIZE")
 vehicle.armed = False
+while vehicle.armed:
+    print(" Waiting for disarming...")
+    vehicle.armed = False
+
+
 log_example("W","Mode changed to STABILIZE")
 
 print(vehicle.version)
@@ -58,7 +61,7 @@ baudrate = 115200  # Change this to your baud rate
 # Create a MAVLink connection
 mav = mavutil.mavlink_connection(serial_port, baud=baudrate)
 
-systemid = 101
+systemid = 102
 targetAltitude = 1.5 #meters
 
 print(mav)
@@ -74,20 +77,20 @@ def landvehicle():
             # Break and return from function just below target altitude.
             if vehicle.location.global_relative_frame.alt <=0.74:
                 print("Reached ground")
-                time.sleep(1)
+                # time.sleep(1)
                 break
-            time.sleep(1)
+        time.sleep(1)
 
-        while True:
-            vehicle.armed = False
-                # Confirm vehicle armed before attempting to take off
-            while vehicle.armed:
-                print(" Waiting for disarming...")
-                vehicle.armed = False
-                vehicle.mode = VehicleMode("STABILIZE")
-                time.sleep(1)
+        vehicle.armed = False
+        # while True:
+        #         # Confirm vehicle armed before attempting to take off
+        #     while vehicle.armed:
+        #         print(" Waiting for disarming...")
+        #         vehicle.armed = False
+        #         vehicle.mode = VehicleMode("STABILIZE")
+        #         time.sleep(1)
             
-            break
+        #     break
         rawarmedstate = False
         relayingrawarmedstate = False
 
@@ -95,6 +98,7 @@ def arm_takeoff(aTargetAltitude):
         print("Arming motors")
         # Copter should arm in GUIDED mode
         vehicle.mode = VehicleMode("GUIDED")
+        time.sleep(2)
         vehicle.armed = True
 
         # Confirm vehicle armed before attempting to take off
@@ -151,12 +155,12 @@ def send_mavlink_message():
         vehicle._last_heartbeat, 
         (-1 if vehicle.battery.level==None else vehicle.battery.level), 
         vmode, 
-        (1 if(vehicle.armed==True) else 0),
+        (1 if vehicle.armed else 0),
         timestampcounter, 0, 0  # Parameters 1-6
     )
     timestampcounter+=1
     mav.mav.send(msg,force_mavlink1=True)
-    log_example("D",F"sent {vehicle._last_heartbeat},{vehicle.battery.level}, {vmode} , {vehicle.armed}")
+    log_example("D",F"sent {vehicle._last_heartbeat},{vehicle.battery.level}, {vmode} , {1 if vehicle.armed else 0}")
 
     msg1 = mav.mav.command_long_encode(
         systemid, 100,  # System ID, Component ID
@@ -167,7 +171,7 @@ def send_mavlink_message():
         vehicle.location.global_relative_frame.lon, 
         vehicle.heading, 
         vehicle.gps_0.satellites_visible, 
-        0, 0  # Parameters 1-6
+        (1 if vehicle.armed else 0), 0  # Parameters 1-6
     )
     log_example("D",F"sent {vehicle.location.global_relative_frame.alt},{vehicle.location.global_relative_frame.lat}, {vehicle.location.global_relative_frame.lon} , {vehicle.heading}, {vehicle.gps_0.satellites_visible}")
 
